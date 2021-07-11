@@ -3,12 +3,8 @@ using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Threading.Tasks;
 
-namespace DotDecentralized.Console
+namespace DotSsi
 {
-    //TODO: Just a quick sketch on adding a console program.
-    //Testing could be by testing the command objects and inspecting the results.
-    //Should probably use something like https://github.com/NikiforovAll/Spectre.Console.Extensions.
-
     public class DidCreateCommand: AsyncCommand<DidCreateCommand.Settings>
     {
         public class Settings: CommandSettings
