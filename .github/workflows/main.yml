@@ -111,7 +111,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: nupkg
-        path: ./src/${{env.$DOTSSI}}/nupkg/*.nupkg
+        path: ./src/${{env.DOTSSI}}/nupkg/*.nupkg
           
   prerelease:
       needs: build
