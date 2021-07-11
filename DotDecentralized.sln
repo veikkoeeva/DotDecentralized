@@ -20,12 +20,14 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotDecentralized.BouncyCastle", "src\DotDecentralized.BouncyCastle\DotDecentralized.BouncyCastle.csproj", "{5F50E8E9-8DB3-48E5-A9AF-1D9A76EB586A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotDecentralized.Console", "src\DotDecentralized.Console\DotDecentralized.Console.csproj", "{737FCB5B-1325-4C24-BE05-4B821A795B51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotSsi", "src\DotSsi\DotSsi.csproj", "{737FCB5B-1325-4C24-BE05-4B821A795B51}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sidetree", "src\SideTree\Sidetree.csproj", "{EC02D871-F22A-4D28-94C8-9A815709AE3B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotDecentralized.NSec", "src\DotDecentralized.NSec\DotDecentralized.NSec.csproj", "{EE904653-2EDF-4115-B603-D4B6188634B2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotDecentralized.Security.Windows", "src\DotDecentralized.Security.Windows\DotDecentralized.Security.Windows.csproj", "{4A0D81AF-06F7-4177-A8C9-EE74D41F8B3E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotDecentralized.Security.Windows", "src\DotDecentralized.Security.Windows\DotDecentralized.Security.Windows.csproj", "{4A0D81AF-06F7-4177-A8C9-EE74D41F8B3E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

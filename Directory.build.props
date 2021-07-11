@@ -6,10 +6,10 @@
 
   <!-- Common assembly and nuget package parameters. -->
   <PropertyGroup>
-    <Authors>Veikko Eeva and contributors</Authors>
+    <Authors>Lumoin and contributors</Authors>
     <Product>DotDecentralized</Product>
     <Copyright>Someone someone?</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageLicenseExpression>Apache2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/xyz</PackageProjectUrl>
     <PackageIcon>logo_128.png</PackageIcon>
     <PackageTags>Decentralized identifiers data models</PackageTags>
@@ -23,7 +23,7 @@
     <!-- <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally> -->
   </PropertyGroup>
 
-  <!-- Common compile parameters. -->
+  <!-- Common compiler parameters. -->
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>$(NoWarn);1591;2003</NoWarn>

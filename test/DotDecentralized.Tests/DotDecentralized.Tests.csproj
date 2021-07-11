@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="LiquidTestReports.Markdown" Version="1.0.9" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
     <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="5.0.0" />
@@ -29,6 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\DotDecentralized.BouncyCastle\DotDecentralized.BouncyCastle.csproj" />
     <ProjectReference Include="..\..\src\DotDecentralized.Console\DotDecentralized.Console.csproj" />
+    <ProjectReference Include="..\..\src\DotSsi\DotSsi.csproj" />
     <ProjectReference Include="..\..\src\DotDecentralized.Core\DotDecentralized.Core.csproj" />
     <ProjectReference Include="..\..\src\DotDecentralized.NSec\DotDecentralized.NSec.csproj" />
     <ProjectReference Include="..\..\src\SideTree\Sidetree.csproj" />

@@ -14,22 +14,22 @@ namespace DotDecentralized.Tests
         /// <summary>
         /// Path to current tests.
         /// </summary>
-        public const string RelativeTestPathToCurrent = @"..\..\..\TestDIDDocuments\current\";
+        public const string RelativeTestPathToCurrent = "..//..//../TestDIDDocuments//current//";
 
         /// <summary>
         /// Path to deprecated documents according to tests.
         /// </summary>
-        public const string RelativeTestPathToDeprecated = @"..\..\..\TestDIDDocuments\deprecated\";
+        public const string RelativeTestPathToDeprecated = "..//..//..//TestDIDDocuments//deprecated//";
 
         /// <summary>
         /// Path to extended documents according to tests.
         /// </summary>
-        public const string RelativeTestPathToExtended = @"..\..\..\TestDIDDocuments\extended\";
+        public const string RelativeTestPathToExtended = "..//..//../TestDIDDocuments//extended//";
 
         /// <summary>
         /// Path to Sidetree documents.
         /// </summary>
-        public const string RelativeTestPathToSidetree = @"..\..\..\TestDIDDocuments\Sidetree\";
+        public const string RelativeTestPathToSidetree = "..//..//../TestDIDDocuments//Sidetree//";
 
         /// <summary>
         /// Test material is loaded from external files. This check preconditions assumed on them hold.

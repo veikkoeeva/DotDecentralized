@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.IO.Enumeration;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -62,7 +64,7 @@ namespace DotDecentralized.Tests
                 throw new ArgumentException(nameof(searchPattern));
             }
 
-            DirectoryPath = directory ;
+            DirectoryPath = directory;
             SearchPattern = searchPattern;
             SearchOption = searchOption;
         }
@@ -76,8 +78,32 @@ namespace DotDecentralized.Tests
                 throw new ArgumentNullException(nameof(testMethod));
             }
 
-            var files = Directory.GetFiles(DirectoryPath, SearchPattern, SearchOption);
-            if(files.Length > 0)
+
+             var enumeration = new FileSystemEnumerable<string>(
+                directory: DirectoryPath,
+                transform: (ref FileSystemEntry entry) => entry.ToFullPath(),
+                options: new EnumerationOptions()
+                {
+                    RecurseSubdirectories = true
+                })
+            {
+                 ShouldIncludePredicate = (ref FileSystemEntry entry) =>
+                 {
+                     if(entry.IsDirectory)
+                     {
+                         return false;
+                     }
+
+                     var entryPath =entry.ToFullPath();
+                     return entryPath.EndsWith(SearchPattern);
+                 }
+            };
+
+            var files = enumeration.ToList();
+
+            //Debug.Assert(false);
+            //var files = Directory.GetFiles(Path.GetFullPath(DirectoryPath), SearchPattern, SearchOption);
+            if(files.Count > 0)
             {
                 return files.Select(file => new[] { Path.GetFileName(file), File.ReadAllText(file) });
             }

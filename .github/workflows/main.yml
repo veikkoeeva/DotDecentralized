@@ -1,66 +1,156 @@
 name: DotDecentralized
 
 on:
-  push:
-    branches: [ master ]
+  push:   
   pull_request:
-    branches: [ master ]
+  release:
+    types:
+      - published
+    branches:
+    - main   
+  schedule:
+  # A daily build to check all is still functioning.
+  - cron: "0 0 * * *"
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
     env:
-      config: 'Release'
+      BUILD_CONFIGURATION: release
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+      DOTNET_NOLOGO: true
+      NUGET_XMLDOC_MODE: skip
+      NUGET_PACKAGES: ${{github.workspace}}/.nuget/packages      
+      NUGET_API_KEY: ${{secrets.NUGET_API_KEY}}
+      NUGET_FEED: https://api.nuget.org/v3/index.json
+      GITHUB_USER: veikkoeeva
+      GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      GITHUB_FEED: https://github.com/veikkoeeva/DotDecentralized/
+      DOTSSI: DotSsi
       
-    steps:
-    - uses: actions/checkout@v2
-    - name: .NET5 setup
-      uses: actions/setup-dotnet@v1
+    steps:        
+    - name: Checkout code
+      uses: actions/checkout@v2.3.4
       with:
-        dotnet-version: 5.n
-      
-      # Restore dependencies.
+        fetch-depth: 0
+    
+    - uses: actions/cache@v2.1.6
+      with:
+        path: ${{env.NUGET_PACKAGES}}
+        key: ${{runner.os}}-nuget-${{hashFiles('**/packages.lock.json')}}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    
+    - name: Setup .NET 5.0 SDK
+      uses: actions/setup-dotnet@v1.8.1
+      with:
+        dotnet-version: 5.*     
+
     - name: Install dependencies
-      run: dotnet restore
-      
-      # Build project.
+      run: dotnet restore --locked-mode
+
     - name: Build
-      run: dotnet build --configuration $config --no-restore
+      run: dotnet build --configuration ${{env.BUILD_CONFIGURATION}} --no-restore
       
     - name: Set build number for the PR
       id: PRNUMBER
-      if: ${{ github.event_name == 'pull_request' }}
-      uses: kkak10/pr-number-action@v1.3
-      
-      # Creates the report file. 
-    - name: Set Test Title
-      run: | 
-            if ${{ github.event_name == 'pull_request' }}
+      if: ${{github.event_name == 'pull_request'}}
+      uses: kkak10/pr-number-action@8f5358941366822cd0825e04dfe68437f2f5f15b
+
+    - name: Set PR markdown title name
+      id: MD_TITLE
+      run: |
+            if ${{github.event_name == 'pull_request'}}
             then
-              echo "::set-env name=title::Test Run for PR #${{steps.PRNUMBER.outputs.pr}} (${{github.run_number}})"
-              echo "::set-env name=file_name::TestReport.${{steps.PRNUMBER.outputs.pr}}.${{github.run_number}}.md"
+              echo '::set-output name=title::Test Run for PR #${{steps.PRNUMBER.outputs.pr}} (${{github.run_number}})'
+              echo '::set-output name=file_name::TestReport_${{steps.PRNUMBER.outputs.pr}}_${{github.run_number}}.md'
             else
-              echo "::set-env name=title::Test Run ${{github.run_number}}"
-              echo "::set-env name=file_name::TestReport.${{github.run_number}}.md"
+              echo '::set-output name=title::Test Run ${{github.run_number}}'
+              echo '::set-output name=file_name::TestReport_${{github.run_number}}.md'
             fi
       
-      # Tests the built project.
-    - name: Testing the pull request
-      run: dotnet test --no-restore --no-build --configuration $config --logger:"liquid.md;LogFileName=${{github.workspace}}/${{env.file_name}};Title=${{env.title}};"
-      
-      # Uploads the build artefacts.
-    - name: Upload a Build Artifact
+      # Bash shell is pre-installed on Github Windows build machines, so this does not increase run time.
+      # There is not also shell related dependencies that ought to be noticed on Windows.
+      shell: bash
+         
+    - name: Test PR
+      run: |        
+        dotnet test --no-restore --no-build --configuration ${{env.BUILD_CONFIGURATION}} --logger:'liquid.md;LogFileName=${{github.workspace}}/${{steps.MD_TITLE.outputs.file_name}};Title=${{steps.MD_TITLE.outputs.title}};'
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: "!**/.nuget/packages/**/*.*"
+        
+    - name: Upload build artifacts
       uses: actions/upload-artifact@v2
       if: ${{always()}}
       with:
         name: 'Test Run'
-        path: ${{github.workspace}}/${{env.file_name}}
-      
-      # Adds the generated report as a comment by the CI.
-    - name: CI commenting the PR.
-      uses: machine-learning-apps/pr-comment@master
-      if: ${{ github.event_name == 'pull_request' }}
+        path: ${{github.workspace}}/${{steps.MD_TITLE.outputs.file_name}}
+            
+    - name: Comment PR with the generated test Markdown
+      uses: machine-learning-apps/pr-comment@78e77cd435e0f9706512ea294d846058ae46f7ff
+      if: ${{github.event_name == 'pull_request'}}
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
-        path: ${{env.file_name}}
+        path: ${{steps.MD_TILE.outputs.file_name}}
+    
+    # Only one environment is needed for uploading artefacts. Ubuntu seem to be the fastest one.
+    - name: Pack
+      if: matrix.os == 'ubuntu-latest'
+      run: dotnet pack --configuration ${{env.BUILD_CONFIGURATION}} --no-restore --include-symbols --include-source -p:PackageVersion=$GITHUB_RUN_ID src/$DOTSSI/$DOTSSI.csproj
+      
+    - name: Upload Nuget artifact
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v2
+      with:
+        name: nupkg
+        path: ./src/${{ env.PROJECT_NAME }}/bin/Release/*.nupkg
+          
+  prerelease:
+      needs: build
+      if: github.ref == 'refs/heads/develop'
+      runs-on: ubuntu-latest
+      steps:
+        - name: Download Artifact
+          uses: actions/download-artifact@v2.0.10
+          with:
+            name: nupkg
+        - name: Push to GitHub Feed
+          run: |
+            for f in ./nupkg/*.nupkg
+            do
+              curl -vX PUT -u "$GITHUB_USER:$GITHUB_TOKEN" -F package=@$f $GITHUB_FEED
+            done
+  deploy:
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.*
+      - name: Create Release NuGet package
+        run: |
+          arrTag=(${GITHUB_REF//\// })
+          VERSION="${arrTag[2]}"
+          echo Version: $VERSION
+          VERSION="${VERSION//v}"
+          echo Clean Version: $VERSION
+          dotnet pack --configuration ${{env.BUILD_CONFIGURATION}} --include-symbols --include-source -p:PackageVersion=$VERSION -o nupkg src/$DOTSSI/$DOTSSI.cproj
+      - name: Push to GitHub Feed
+        run: |
+          for f in ./nupkg/*.nupkg
+          do
+            curl -vX PUT -u "$GITHUB_USER:$GITHUB_TOKEN" -F package=@$f $GITHUB_FEED
+          done
+      - name: Push to NuGet feed
+        run: dotnet nuget push ./nupkg/*.nupkg --source $NUGET_FEED --skip-duplicate --api-key $NUGET_API_KEY

@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>dotssi</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <Authors>Lumoin and contributors</Authors>
+    <AssemblyVersion>0.0.0.1</AssemblyVersion>
+    <FileVersion>0.0.0.1</FileVersion>
+    <PackageLicenseExpression />
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Version>0.0.1</Version>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageIcon>dotssi-logo.png</PackageIcon>
+    <PackageIconUrl />
+    <Copyright>Lumoin Oy</Copyright>
+    <Product>DotSsi</Product>
+    <PackageProjectUrl>https://github.com/lumoin/DotDecentralized</PackageProjectUrl>
+    <Company>Lumoin</Company>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" Version="0.40.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="resources\dotssi-logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+</Project>
