@@ -18,7 +18,7 @@ namespace DotDecentralized.Tests
         /// </summary>
         /// <param name="didDocumentFileName">The DID document data file under test.</param>
         /// <param name="didDocumentFileContents">The DID document data file contents.</param>
-        [Theory(Skip = "Needs a change in DidCore.Servic implementation. See comments there.")]
+        [Theory(Skip = "Needs a change in DidCore.Service implementation. See comments there.")]
         [FilesData(TestInfrastructureConstants.RelativeTestPathToSidetree, "ion-1.json")]
         public void CanRoundtripIonDid(string didDocumentFilename, string didDocumentFileContents)
         {
