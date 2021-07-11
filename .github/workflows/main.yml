@@ -104,7 +104,7 @@ jobs:
     # Only one environment is needed for uploading artefacts. Ubuntu seem to be the fastest one.
     - name: Pack
       if: matrix.os == 'ubuntu-latest'
-      run: dotnet pack --configuration ${{env.BUILD_CONFIGURATION}} --no-restore --include-symbols --include-source -p:PackageVersion=$GITHUB_RUN_ID src/$DOTSSI/$DOTSSI.csproj
+      run: dotnet pack --configuration ${{env.BUILD_CONFIGURATION}} --no-restore --include-symbols --include-source -p:PackageVersion=$GITHUB_RUN_ID --output dotssi src/$DOTSSI/$DOTSSI.csproj
       
     - name: Upload DotSsi Nuget package
       if: matrix.os == 'ubuntu-latest'
@@ -145,7 +145,7 @@ jobs:
           echo Version: $VERSION
           VERSION="${VERSION//v}"
           echo Clean Version: $VERSION
-          dotnet pack --configuration ${{env.BUILD_CONFIGURATION}} --include-symbols --include-source -p:PackageVersion=$VERSION -o nupkg src/$DOTSSI/$DOTSSI.cproj
+          dotnet pack --configuration ${{env.BUILD_CONFIGURATION}} --include-symbols --include-source -p:PackageVersion=$VERSION --output dotssi src/$DOTSSI/$DOTSSI.csproj
       - name: Push to GitHub Feed
         run: |
           for f in ./nupkg/*.nupkg
