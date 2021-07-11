@@ -61,16 +61,15 @@ jobs:
       if: ${{github.event_name == 'pull_request'}}
       uses: kkak10/pr-number-action@8f5358941366822cd0825e04dfe68437f2f5f15b
 
-    - name: Set PR markdown title name
-      id: MD_TITLE
+    - name: Set PR markdown title name      
       run: |
-            if ${{github.event_name == 'pull_request'}}
+           if ${{ github.event_name == 'pull_request' }}
             then
-              echo '::set-output name=title::Test Run for PR #${{steps.PRNUMBER.outputs.pr}} (${{github.run_number}})'
-              echo '::set-output name=file_name::TestReport_${{steps.PRNUMBER.outputs.pr}}_${{github.run_number}}.md'
+              echo "::set-env name=title::Test Run for PR #${{steps.PRNUMBER.outputs.pr}} (${{github.run_number}})"
+              echo "::set-env name=file_name::TestReport.${{steps.PRNUMBER.outputs.pr}}.${{github.run_number}}.md"
             else
-              echo '::set-output name=title::Test Run ${{github.run_number}}'
-              echo '::set-output name=file_name::TestReport_${{github.run_number}}.md'
+              echo "::set-env name=title::Test Run ${{github.run_number}}"
+              echo "::set-env name=file_name::TestReport.${{github.run_number}}.md"
             fi
       
       # Bash shell is pre-installed on Github Windows build machines, so this does not increase run time.
@@ -79,19 +78,19 @@ jobs:
          
     - name: Test PR
       run: |        
-        dotnet test --no-restore --no-build --configuration ${{env.BUILD_CONFIGURATION}} --logger:'liquid.md;LogFileName=${{github.workspace}}/${{steps.MD_TITLE.outputs.file_name}};Title=${{steps.MD_TITLE.outputs.title}};'
+        dotnet test --no-restore --no-build --configuration ${{env.BUILD_CONFIGURATION}} --logger:'liquid.md;LogFileName=${{github.workspace}}/${{env.file_name}};Title=${{env.title}};'
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
         file: "!**/.nuget/packages/**/*.*"
         
-    - name: Upload build artifacts
+    - name: Upload PR build information artefact
       uses: actions/upload-artifact@v2
       if: ${{always()}}
       with:
         name: 'Test Run'
-        path: ${{github.workspace}}/${{steps.MD_TITLE.outputs.file_name}}
+        path: ${{github.workspace}}/${{env.file_name}}
             
     - name: Comment PR with the generated test Markdown
       uses: machine-learning-apps/pr-comment@78e77cd435e0f9706512ea294d846058ae46f7ff
@@ -99,7 +98,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
-        path: ${{steps.MD_TILE.outputs.file_name}}
+        path: ${{env.file_name}}
     
     # Only one environment is needed for uploading artefacts. Ubuntu seem to be the fastest one.
     - name: Pack
