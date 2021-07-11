@@ -35,12 +35,7 @@ namespace DotDecentralized.Security.Windows
         /// <param name="protectedMemoryPool">The more pool in which to store the encrypted data.</param>
         public EncryptedMemoryWindows(byte[] sensitiveMemory, byte[] entropy, DataProtectionScope protectionScope, MemoryPool<byte> protectedMemoryPool): base(EncryptedMemory(sensitiveMemory, entropy, protectionScope, protectedMemoryPool))
         {
-            if(entropy == null)
-            {
-                throw new ArgumentNullException(nameof(entropy));
-            }
-
-            this.entropy = entropy;
+            this.entropy = entropy ?? throw new ArgumentNullException(nameof(entropy));
             this.dataProtectionScope = protectionScope;
         }
 

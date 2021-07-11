@@ -3,15 +3,11 @@ using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Threading.Tasks;
 
-namespace DotDecentralized.Console
+namespace DotSsi
 {
-    //TODO: Just a quick sketch on adding a console program.
-    //Testing could be by testing the command objects and inspecting the results.
-    //Should probably use something like https://github.com/NikiforovAll/Spectre.Console.Extensions.
-
-    public class DidCreateCommand: AsyncCommand<DidCreateCommand.Settings>
+    public class DidCreateCommand: AsyncCommand<DidCreateCommand.DidSettings>
     {
-        public class Settings: CommandSettings
+        public class DidSettings: CommandSettings
         {
             [CommandArgument(0, "<ID>")]
             [Description("Identifier for the new DID document.")]
@@ -26,7 +22,7 @@ namespace DotDecentralized.Console
             public string ExtraParam { get; set; }
         }
 
-        public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
+        public override Task<int> ExecuteAsync(CommandContext context, DidSettings settings)
         {
             var extraParam = settings.ExtraParam ?? string.Empty;
             AnsiConsole.MarkupLine(
@@ -82,6 +78,16 @@ namespace DotDecentralized.Console
     }
 
 
+    public class InfoTpmCommand: AsyncCommand
+    {
+        public override Task<int> ExecuteAsync(CommandContext context)
+        {
+            AnsiConsole.MarkupLine("[bold blue]Trusted platform module (TPM) information (coming)[/]");
+            return Task.FromResult(0);
+        }
+    }
+
+
     /// <summary>
     /// A console program for DID and VC documents.
     /// </summary>
@@ -98,7 +104,7 @@ namespace DotDecentralized.Console
             app.Configure(config =>
             {
                 config.CaseSensitivity(CaseSensitivity.None);
-                config.SetApplicationName("DotDecentralized");
+                config.SetApplicationName("DotSsi");
                 config.ValidateExamples();
 
                 config.AddBranch("did", did =>
@@ -121,6 +127,15 @@ namespace DotDecentralized.Console
                     did.AddCommand<DidViewCommand>("view")
                         .WithDescription("View DID document.")
                         .WithExample(new[] { "did", "view", "123" });
+                });
+
+                config.AddBranch("info", info =>
+                {
+                    info.SetDescription("Print selected platform information (only tpm currently)");
+
+                    info.AddCommand<InfoTpmCommand>("tpm")
+                        .WithDescription("Print trusted platform module (TPM) information")
+                        .WithExample(new[] { "info", "tpm" });
                 });
             });
 
