@@ -81,7 +81,7 @@ jobs:
         dotnet test --no-restore --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --logger:'liquid.md;LogFileName=${{ github.workspace }}/${{ env.file_name }};Title=${{ env.title }};'
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v2.0.1
       with:
         file: "!**/.nuget/packages/**/*.*"
         
