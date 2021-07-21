@@ -45,12 +45,6 @@ jobs:
     - uses: jwalton/gh-find-current-pr@b6f8d7342efe4913388d5d1ac7f4b956caa5db52
       id: findPrNumber
       
-    - run: echo
-    - if: success() && steps.findPr.outputs.number
-      env:
-        PR_NUMBER: ${{ steps.findPrNumber.outputs.pr }}
-      shell: bash
-
     # Windows builds may have insufficient resource limits, so they're increased.
     - name: Configure Windows Pagefile
       if: ${{ matrix.os == 'windows-latest' }}
@@ -115,13 +109,13 @@ jobs:
 
     - name: Set PR markdown title name
       run: |
-           if ${{ github.event_name == 'pull_request' }}
+           if ${{ steps.findPrNumber.outputs.pr }}
             then
-              echo "title=Test Run for PR #${{ PR_NUMBER }} (${{ github.run_number }})" >> $GITHUB_ENV
-              echo "file_name=TestReport.${{ PR_NUMBER }}.${{ github.run_number }}.md" >> $GITHUB_ENV
+              echo "title=Test Run for PR #${{ steps.findPrNumber.outputs.pr }} (${{ github.run_number }})" >> $GITHUB_ENV
+              echo "file_name=TestReport.${{ steps.findPrNumber.outputs.pr }}.${{ github.run_number }}.md" >> $GITHUB_ENV
             else
-              echo "title=Test Run ${{ PR_NUMBER }}" >> $GITHUB_ENV
-              echo "file_name=TestReport.${{ PR_NUMBER }}.md" >> $GITHUB_ENV
+              echo "title=Test Run ${{ steps.findPrNumber.outputs.pr }}" >> $GITHUB_ENV
+              echo "file_name=TestReport.${{ steps.findPrNumber.outputs.pr }}.md" >> $GITHUB_ENV
             fi
 
       # Bash shell is pre-installed on Github Windows build machines, so this does not increase run time.
