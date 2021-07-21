@@ -44,8 +44,7 @@ jobs:
     - name: Find PR number if it exists
     - uses: jwalton/gh-find-current-pr@b6f8d7342efe4913388d5d1ac7f4b956caa5db52
       id: findPrNumber
-
-    - name: Put PR number to environment variable
+      
     - run: echo
     - if: success() && steps.findPr.outputs.number
       env:
