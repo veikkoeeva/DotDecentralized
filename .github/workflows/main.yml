@@ -44,6 +44,8 @@ jobs:
     - name: Find PR number if it exists
       uses: jwalton/gh-find-current-pr@b6f8d7342efe4913388d5d1ac7f4b956caa5db52
       id: findPrNumber
+      with:
+        sha: ${{ github.event.pull_request.head.sha }}
       
     # Windows builds may have insufficient resource limits, so they're increased.
     - name: Configure Windows Pagefile
