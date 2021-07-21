@@ -149,7 +149,7 @@ jobs:
 
     - name: Comment PR with the generated test Markdown
       uses: machine-learning-apps/pr-comment@78e77cd435e0f9706512ea294d846058ae46f7ff
-      if: ${{ github.event_name == 'pull_request' && matrix.os == 'ubuntu-latest' }}
+      if: ${{ matrix.os == 'ubuntu-latest' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
