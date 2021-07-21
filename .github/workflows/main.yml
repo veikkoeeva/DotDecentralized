@@ -40,24 +40,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
 
-    steps:
-    - uses: actions/github-script@v3
-      id: get-pr
-      with:
-        script: |
-          const request = {
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number
-          }
-          core.info(`Getting PR #${request.pull_number} from ${request.owner}/${request.repo}`)
-          try {
-            const result = await github.pulls.get(request)
-            return result.data
-          } catch (err) {
-            core.setFailed(`Request failed with error ${err}`)
-          }
-      
+    steps:    
     # Windows builds may have insufficient resource limits, so they're increased.
     - name: Configure Windows Pagefile
       if: ${{ matrix.os == 'windows-latest' }}
@@ -122,13 +105,13 @@ jobs:
 
     - name: Set PR markdown title name
       run: |
-           if ${{ steps.findPrNumber.outputs.pr }}
+           if ${{ true }}
             then
-              echo "title=Test Run for PR #${{ steps.findPrNumber.outputs.pr }} (${{ github.run_number }})" >> $GITHUB_ENV
-              echo "file_name=TestReport.${{ steps.findPrNumber.outputs.pr }}.${{ github.run_number }}.md" >> $GITHUB_ENV
+              echo "title=Test Run for PR #${{ 123 }} (${{ github.run_number }})" >> $GITHUB_ENV
+              echo "file_name=TestReport.${{ 123 }}.${{ github.run_number }}.md" >> $GITHUB_ENV
             else
-              echo "title=Test Run ${{ steps.findPrNumber.outputs.pr }}" >> $GITHUB_ENV
-              echo "file_name=TestReport.${{ steps.findPrNumber.outputs.pr }}.md" >> $GITHUB_ENV
+              echo "title=Test Run ${{ 123 }}" >> $GITHUB_ENV
+              echo "file_name=TestReport.${{ 123 }}.md" >> $GITHUB_ENV
             fi
 
       # Bash shell is pre-installed on Github Windows build machines, so this does not increase run time.
