@@ -1,6 +1,7 @@
-name: DotDecentralized
+name: Verifable .NET build
 
 on:
+  workflow_dispatch:
   push:
   pull_request:
   release:
@@ -34,6 +35,37 @@ env:
   DOTSSI: DotSsi
 
 jobs:
+  CodeQL-Build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        # Must fetch at least the immediate parents so that if this is
+        # a pull request then we can checkout the head of the pull request.
+        # Only include this option if you are running this workflow on pull requests.
+        fetch-depth: 2
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        queries: security-and-quality
+        languages: csharp
+
+    - name: Install dependencies
+      run: dotnet restore --locked-mode
+
+    - name: Build
+      run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore -property:ContinuousIntegrationBuild=true
+      timeout-minutes: 5
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1
+
   build:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -72,15 +104,16 @@ jobs:
     - name: Check Linux TPM 2.0 module functionality
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        sudo service tpm2-abrmd start
-        sudo tpm2-abrmd --allow-root --tcti=mssim --logger=stdout
+        service tpm2-abrmd start
+        tpm2-abrmd --tcti=mssim --logger=stdout
 
     - name: Checkout code
       uses: actions/checkout@v2.3.4
       with:
         fetch-depth: 2
 
-    - uses: actions/cache@v2.1.6
+    - name: Cache Nuget packages '${{ matrix.os }}'
+      uses: actions/cache@v2.1.6
       with:
         path: ${{ env.NUGET_PACKAGES }}
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
@@ -92,23 +125,12 @@ jobs:
       with:
         dotnet-version: 5.*
 
-    # Temporarily disabled to save time on interating the build...
-    # - name: Initialize CodeQL
-    #  uses: github/codeql-action/init@v1
-    #  with:
-    #    queries: security-and-quality
-    #    languages: csharp
-
     - name: Install dependencies
       run: dotnet restore --locked-mode
 
     - name: Build
       run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore -property:ContinuousIntegrationBuild=true
       timeout-minutes: 5
-
-    # See on initializing CodeQL...
-    # - name: Run CodeQL security analysis
-    #  uses: github/codeql-action/analyze@v1
 
     - name: Set PR markdown title name
       run: |
@@ -126,8 +148,7 @@ jobs:
       shell: bash
 
     - name: Test PR
-      run: |
-        dotnet test --verbosity normal --no-restore --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --logger:'liquid.md;LogFileName=${{ github.workspace }}/${{ env.file_name }};Title=${{ env.title }};' -property:CollectCoverage=true -property:DeterministicSourcePaths=true -property:IncludeTestAssembly=true -property:CoverletOutputFormat=cobertura /p:CoverletOutput='${{ github.workspace }}/reports/coverage/'
+      run: dotnet test --verbosity normal --no-restore --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --logger:'liquid.md;LogFileName=${{ github.workspace }}/${{ env.file_name }};Title=${{ env.title }};' -property:CollectCoverage=true -property:DeterministicSourcePaths=true -property:IncludeTestAssembly=true -property:CoverletOutputFormat=cobertura /p:CoverletOutput='${{ github.workspace }}/reports/coverage/'
       timeout-minutes: 5
 
     # Currently reports collected only from Ubuntu.
@@ -184,9 +205,9 @@ jobs:
           uses: actions/download-artifact@v2.0.10
           with:
             name: nupkg
+
         - name: Push to GitHub registry
-          run: |
-            dotnet nuget push "**/*.nupkg" --source ${{ env.GITHUB_FEED }} --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+          run: dotnet nuget push "**/*.nupkg" --source ${{ env.GITHUB_FEED }} --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
 
   deploy:
     needs: build
@@ -194,10 +215,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 5.*
+
       - name: Create Release NuGet package
         run: |
           arrTag=(${GITHUB_REF//\// })
@@ -206,8 +229,9 @@ jobs:
           VERSION="${VERSION//v}"
           echo Clean Version: $VERSION
           dotnet pack --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore --include-symbols --include-source -property:PackageVersion=$GITHUB_RUN_ID --output ./nupkg src/$DOTSSI/$DOTSSI.csproj
+
       - name: Push to GitHub Feed
-        run: |
-          dotnet nuget push "**/*.nupkg" --source ${{ env.GITHUB_FEED }} --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+        run: dotnet nuget push "**/*.nupkg" --source ${{ env.GITHUB_FEED }} --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+
       - name: Push to NuGet feed
         run: dotnet nuget push **/*.*nupkg --source $NUGET_FEED --skip-duplicate --api-key $NUGET_API_KEY
